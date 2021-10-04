@@ -1,6 +1,6 @@
-interface AddonClass {
-  sum(): number;
+interface Addon {
+  sum(a: number, b: number): number;
 }
 
-const addon: AddonClass = require('../build/Release/addon');
+const addon: Addon = require('../build/Release/addon');
 export default addon;

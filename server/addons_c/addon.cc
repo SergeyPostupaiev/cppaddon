@@ -1,20 +1,53 @@
 #include <node.h>
 
-void Sum(const v8::FunctionCallbackInfo<v8::Value>& args) {
- v8::Isolate* isolate=args.GetIsolate();
- 
- double i;
- double a=3.1415926, b=2.718;
- for(i=0; i<100000000; i++){
-     a+=b;
- }   
+namespace demo {
 
- auto total = v8::Number::New(isolate, a);
- args.GetReturnValue().Set(total);
+using v8::Exception;
+using v8::FunctionCallbackInfo;
+using v8::Isolate;
+using v8::Local;
+using v8::Number;
+using v8::Object;
+using v8::String;
+using v8::Value;
+
+// This is the implementation of the "add" method
+// Input arguments are passed using the
+// const FunctionCallbackInfo<Value>& args struct
+void Sum(const FunctionCallbackInfo<Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  // Check the number of arguments passed.
+  if (args.Length() < 2) {
+    // Throw an Error that is passed back to JavaScript
+    isolate->ThrowException(Exception::TypeError(
+        String::NewFromUtf8(isolate,
+                            "Wrong number of arguments").ToLocalChecked()));
+    return;
+  }
+
+  // Check the argument types
+  if (!args[0]->IsNumber() || !args[1]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(
+        String::NewFromUtf8(isolate,
+                            "Wrong arguments").ToLocalChecked()));
+    return;
+  }
+
+  // Perform the operation
+  double value =
+      args[0].As<Number>()->Value() + args[1].As<Number>()->Value();
+  Local<Number> num = Number::New(isolate, value);
+
+  // Set the return value (using the passed in
+  // FunctionCallbackInfo<Value>&)
+  args.GetReturnValue().Set(num);
 }
 
-void Initialize(v8::Local<v8::Object> exports){
-    NODE_SET_METHOD(exports,"sum", Sum);
+void Init(Local<Object> exports) {
+  NODE_SET_METHOD(exports, "sum", Sum);
 }
 
-NODE_MODULE(addon, Initialize)
+NODE_MODULE(NODE_GYP_MODULE_NAME, Init)
+
+} 
