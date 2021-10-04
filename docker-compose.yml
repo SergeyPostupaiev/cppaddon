@@ -1,0 +1,15 @@
+version: '3'
+services:
+  addon_test:
+    build:
+      context: ./
+      dockerfile: ./server/Dockerfile
+    container_name: addon_test
+    hostname: addon_test
+    network_mode: host
+    ports:
+      - '44555:22'
+    logging:
+      options:
+        max-size: '30m'
+        max-file: '3'
